@@ -13,7 +13,7 @@ import {
   saveActiveId,
 } from './lib/storage.js'
 import {
-  putImage,
+  putImageSafe,
   getAllImages,
   newImageId,
   isImageId,
@@ -112,13 +112,21 @@ export default function App() {
     })
   }
 
-  // 把一张 data URL 写入 IndexedDB + 内存 cache，返回引用 ID
+  // 把一张 data URL 写入 IndexedDB + 内存 cache，返回引用 ID。
+  // 会在配额吃紧时自动从老到新驱逐图片，被驱逐的同时清掉内存 cache。
   async function persistDataUrl(dataUrl) {
     const id = newImageId()
     try {
-      await putImage(id, dataUrl)
+      await putImageSafe(id, dataUrl, (evictedIds) => {
+        if (!evictedIds?.length) return
+        setImageCache((prev) => {
+          const next = new Map(prev)
+          for (const ev of evictedIds) next.delete(ev)
+          return next
+        })
+      })
     } catch {
-      // IndexedDB 写失败也回退到把原始 dataUrl 当 src 用（这次会话内能显示，刷新丢）
+      // 最终还是写不进去（极端情况），回退到把原始 dataUrl 直接当 src 用
       return dataUrl
     }
     setImageCache((prev) => {
