@@ -1,4 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
+import { isImageId } from '../lib/imageStore.js'
+
+// 把消息里的 image 引用（可能是 idb:xxx 或老格式的完整 data URL/http URL）
+// 转成可以直接用作 <img src> 的字符串。
+function resolveImageRef(ref, cache) {
+  if (!ref) return ''
+  if (isImageId(ref)) return cache.get(ref) || ''
+  return ref
+}
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024 // 8 MB / 张
 
@@ -78,6 +87,7 @@ export default function ChatView({
   needsApiKey,
   model,
   onModelChange,
+  imageCache,
 }) {
   const [input, setInput] = useState('')
   const [images, setImages] = useState([]) // [{ id, name, dataUrl }]
@@ -215,17 +225,27 @@ export default function ChatView({
               <div className="msg-bubble">
                 {m.images && m.images.length > 0 && (
                   <div className="msg-images">
-                    {m.images.map((src, k) => (
-                      <button
-                        type="button"
-                        key={k}
-                        className="msg-image"
-                        onClick={() => setPreviewSrc(src)}
-                        title="点击查看大图"
-                      >
-                        <img src={src} alt="" />
-                      </button>
-                    ))}
+                    {m.images.map((ref, k) => {
+                      const src = resolveImageRef(ref, imageCache)
+                      if (!src) {
+                        return (
+                          <div key={k} className="msg-image msg-image-missing">
+                            图片已丢失
+                          </div>
+                        )
+                      }
+                      return (
+                        <button
+                          type="button"
+                          key={k}
+                          className="msg-image"
+                          onClick={() => setPreviewSrc(src)}
+                          title="点击查看大图"
+                        >
+                          <img src={src} alt="" />
+                        </button>
+                      )
+                    })}
                   </div>
                 )}
                 {m.content ||

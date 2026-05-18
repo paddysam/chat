@@ -371,6 +371,17 @@
   max-height: 240px;
   object-fit: contain;
 }
+.msg-image-missing {
+  width: 200px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-sidebar);
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: default;
+}
 
 /* ============ Lightbox ============ */
 .lightbox-backdrop {
