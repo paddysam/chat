@@ -107,10 +107,34 @@ export default function ChatView({
     return () => window.removeEventListener('keydown', onKey)
   }, [previewSrc])
 
-  useEffect(() => {
+  // 用户是否已经接近底部（图片 onLoad 之后只在这种情况下补滚，避免抢用户滚动）
+  const stickToBottomRef = useRef(true)
+
+  function isNearBottom() {
+    const el = scrollRef.current
+    if (!el) return true
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 120
+  }
+
+  function scrollToBottom() {
     const el = scrollRef.current
     if (el) el.scrollTop = el.scrollHeight
+  }
+
+  // 消息变化 / 流式增长：先记录是否在底部，再滚到底
+  useEffect(() => {
+    if (stickToBottomRef.current) scrollToBottom()
   }, [messages, isStreaming])
+
+  // 监听用户手动滚动，更新粘底状态
+  function handleScroll() {
+    stickToBottomRef.current = isNearBottom()
+  }
+
+  // 每张图片加载完都补一次滚动（解决刷新后图片撑高把底顶走的问题）
+  function handleImageLoad() {
+    if (stickToBottomRef.current) scrollToBottom()
+  }
 
   function autoGrow(el) {
     el.style.height = 'auto'
@@ -207,7 +231,7 @@ export default function ChatView({
           </select>
         </label>
       </header>
-      <div className="messages" ref={scrollRef}>
+      <div className="messages" ref={scrollRef} onScroll={handleScroll}>
         {messages.length === 0 ? (
           <div className="welcome">
             <h1>AI 聊天</h1>
@@ -242,7 +266,7 @@ export default function ChatView({
                           onClick={() => setPreviewSrc(src)}
                           title="点击查看大图"
                         >
-                          <img src={src} alt="" />
+                          <img src={src} alt="" onLoad={handleImageLoad} />
                         </button>
                       )
                     })}
