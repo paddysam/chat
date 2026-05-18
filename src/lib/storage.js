@@ -6,7 +6,9 @@ const KEYS = {
 
 const DEFAULT_SETTINGS = {
   apiKey: '',
-  baseUrl: 'https://api.openai.com/v1',
+  // 走本地反向代理，dev 由 Vite proxy 转发到 VITE_API_TARGET。
+  // 生产部署需在 nginx / caddy 把 /api/v1/* 反代到真实上游。
+  baseUrl: '/api/v1',
   model: 'gpt-5.5',
   systemPrompt: '你是一个有帮助的 AI 助手，请用中文回答。',
   temperature: 0.7,

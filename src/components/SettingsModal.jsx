@@ -1,20 +1,10 @@
 import { useState } from 'react'
 
-const PRESETS = [
-  { label: 'OpenAI 官方', baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
-  { label: 'DeepSeek', baseUrl: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
-  { label: 'SiliconFlow', baseUrl: 'https://api.siliconflow.cn/v1', model: 'Qwen/Qwen2.5-7B-Instruct' },
-]
-
 export default function SettingsModal({ settings, onChange, onClose }) {
   const [revealKey, setRevealKey] = useState(false)
 
   function update(patch) {
     onChange({ ...settings, ...patch })
-  }
-
-  function applyPreset(p) {
-    update({ baseUrl: p.baseUrl, model: p.model })
   }
 
   return (
@@ -55,20 +45,13 @@ export default function SettingsModal({ settings, onChange, onClose }) {
               type="text"
               value={settings.baseUrl}
               onChange={(e) => update({ baseUrl: e.target.value })}
-              placeholder="https://api.openai.com/v1"
+              placeholder="/api/v1"
             />
-            <div className="preset-row">
-              {PRESETS.map((p) => (
-                <button
-                  key={p.label}
-                  type="button"
-                  className="preset-btn"
-                  onClick={() => applyPreset(p)}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
+            <small className="hint">
+              默认 <code>/api/v1</code>，走本地反向代理（不直接调上游接口）。
+              dev 上游由 <code>.env.local</code> 的 <code>VITE_API_TARGET</code> 决定，
+              改完要重启 <code>npm run dev</code>。
+            </small>
           </label>
 
           <label className="field">
