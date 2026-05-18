@@ -226,6 +226,14 @@
   white-space: pre-wrap;
 }
 
+.msg-meta {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
 .cursor {
   display: inline-block;
   animation: blink 1s steps(2, start) infinite;

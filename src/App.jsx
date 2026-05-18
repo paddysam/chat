@@ -126,6 +126,7 @@ export default function App() {
     const controller = new AbortController()
     abortRef.current = controller
     setIsStreaming(true)
+    const startedAt = Date.now()
 
     try {
       if (isImageModel(settings.model)) {
@@ -146,6 +147,7 @@ export default function App() {
             role: 'assistant',
             content: '',
             images: [url],
+            durationMs: Date.now() - startedAt,
           }
           return { ...c, messages: msgs }
         })
@@ -162,6 +164,16 @@ export default function App() {
             })
           },
         })
+        // 流式结束，把耗时写到最后一条 assistant 消息上
+        updateConversation(active.id, (c) => {
+          const msgs = c.messages.slice()
+          const last = msgs[msgs.length - 1]
+          msgs[msgs.length - 1] = {
+            ...last,
+            durationMs: Date.now() - startedAt,
+          }
+          return { ...c, messages: msgs }
+        })
       }
     } catch (err) {
       const msg =
@@ -169,7 +181,11 @@ export default function App() {
       updateConversation(active.id, (c) => {
         const msgs = c.messages.slice()
         const last = msgs[msgs.length - 1]
-        msgs[msgs.length - 1] = { ...last, error: msg }
+        msgs[msgs.length - 1] = {
+          ...last,
+          error: msg,
+          durationMs: Date.now() - startedAt,
+        }
         return { ...c, messages: msgs }
       })
     } finally {

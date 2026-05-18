@@ -2,6 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024 // 8 MB / 张
 
+function formatDuration(ms) {
+  if (ms == null) return ''
+  if (ms < 1000) return `${ms} ms`
+  if (ms < 60_000) return `${(ms / 1000).toFixed(2)} s`
+  const s = Math.floor(ms / 1000)
+  return `${Math.floor(s / 60)}m ${s % 60}s`
+}
+
 function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
     const r = new FileReader()
@@ -219,6 +227,11 @@ export default function ChatView({
                     ''
                   ))}
                 {m.error && <div className="msg-error">⚠ {m.error}</div>}
+                {m.role === 'assistant' && m.durationMs != null && (
+                  <div className="msg-meta">
+                    用时 {formatDuration(m.durationMs)}
+                  </div>
+                )}
               </div>
             </div>
           ))
