@@ -13,32 +13,49 @@ function fileToDataUrl(file) {
 
 const MODEL_GROUPS = [
   {
-    label: '旗舰 (最强)',
+    label: '旗舰',
     options: [
-      { value: 'gpt-5.5', label: 'GPT-5.5 · 最新旗舰' },
-      { value: 'gpt-5.5-pro', label: 'GPT-5.5 Pro · 更高精度' },
+      { value: 'gpt-5.5', label: 'GPT-5.5 · 最强' },
       { value: 'gpt-5.4', label: 'GPT-5.4' },
-      { value: 'gpt-5.4-pro', label: 'GPT-5.4 Pro' },
-      { value: 'gpt-5', label: 'GPT-5 · 可调推理深度' },
+      { value: 'gpt-5.4-mini', label: 'GPT-5.4 mini · 便宜快' },
+      { value: 'gpt-5.2-pro', label: 'GPT-5.2 Pro' },
+      { value: 'gpt-5.2', label: 'GPT-5.2' },
+      { value: 'gpt-5.2-chat-latest', label: 'GPT-5.2 · chat-latest' },
     ],
   },
   {
-    label: '经济型 (便宜快)',
+    label: '版本快照',
     options: [
-      { value: 'gpt-5.4-mini', label: 'GPT-5.4 mini' },
-      { value: 'gpt-5.4-nano', label: 'GPT-5.4 nano · 最便宜' },
-      { value: 'gpt-5-mini', label: 'GPT-5 mini' },
-      { value: 'gpt-5-nano', label: 'GPT-5 nano' },
+      { value: 'gpt-5.4-2026-03-05', label: 'GPT-5.4 (2026-03-05)' },
+      { value: 'gpt-5.2-2025-12-11', label: 'GPT-5.2 (2025-12-11)' },
+      { value: 'gpt-5.2-pro-2025-12-11', label: 'GPT-5.2 Pro (2025-12-11)' },
     ],
   },
   {
-    label: '专用',
+    label: '代码 Agent',
     options: [
-      { value: 'gpt-5.3-codex', label: 'GPT-5.3 Codex · 代码 Agent' },
-      { value: 'gpt-4.1', label: 'GPT-4.1 · 非推理最强' },
+      { value: 'gpt-5.3-codex', label: 'GPT-5.3 Codex' },
+      { value: 'gpt-5.3-codex-spark', label: 'GPT-5.3 Codex Spark' },
+      { value: 'codex-auto-review', label: 'Codex Auto-Review' },
+    ],
+  },
+  {
+    label: '音频 / 实时 (实验)',
+    options: [
+      { value: 'gpt-4o-audio-preview', label: 'GPT-4o Audio Preview' },
+      { value: 'gpt-4o-realtime-preview', label: 'GPT-4o Realtime Preview' },
+    ],
+  },
+  {
+    label: '图像生成',
+    options: [
+      { value: 'gpt-image-2', label: 'GPT-Image-2 · 最新文生图' },
+      { value: 'gpt-image-1.5', label: 'GPT-Image-1.5' },
+      { value: 'gpt-image-1', label: 'GPT-Image-1' },
     ],
   },
 ]
+
 
 const ALL_MODEL_VALUES = MODEL_GROUPS.flatMap((g) =>
   g.options.map((o) => o.value),

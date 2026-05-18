@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Sidebar from './components/Sidebar.jsx'
 import ChatView from './components/ChatView.jsx'
 import SettingsModal from './components/SettingsModal.jsx'
-import { streamChat } from './lib/api.js'
+import { streamChat, generateImage } from './lib/api.js'
+import { isImageModel } from './lib/models.js'
 import {
   loadSettings,
   saveSettings,
@@ -127,18 +128,41 @@ export default function App() {
     setIsStreaming(true)
 
     try {
-      await streamChat({
-        settings,
-        messages: history,
-        signal: controller.signal,
-        onDelta: (_delta, full) => {
-          updateConversation(active.id, (c) => {
-            const msgs = c.messages.slice()
-            msgs[msgs.length - 1] = { role: 'assistant', content: full }
-            return { ...c, messages: msgs }
-          })
-        },
-      })
+      if (isImageModel(settings.model)) {
+        // 图像生成：调用 /images/generations，把结果挂到 assistant 消息的 images 里
+        updateConversation(active.id, (c) => {
+          const msgs = c.messages.slice()
+          msgs[msgs.length - 1] = { role: 'assistant', content: '正在生成图像…' }
+          return { ...c, messages: msgs }
+        })
+        const url = await generateImage({
+          settings,
+          prompt: text,
+          signal: controller.signal,
+        })
+        updateConversation(active.id, (c) => {
+          const msgs = c.messages.slice()
+          msgs[msgs.length - 1] = {
+            role: 'assistant',
+            content: '',
+            images: [url],
+          }
+          return { ...c, messages: msgs }
+        })
+      } else {
+        await streamChat({
+          settings,
+          messages: history,
+          signal: controller.signal,
+          onDelta: (_delta, full) => {
+            updateConversation(active.id, (c) => {
+              const msgs = c.messages.slice()
+              msgs[msgs.length - 1] = { role: 'assistant', content: full }
+              return { ...c, messages: msgs }
+            })
+          },
+        })
+      }
     } catch (err) {
       const msg =
         err?.name === 'AbortError' ? '已停止' : err?.message || String(err)

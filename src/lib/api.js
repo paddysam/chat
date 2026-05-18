@@ -1,3 +1,36 @@
+// 文生图：POST /v1/images/generations，非流式，返回 1 张图
+export async function generateImage({ settings, prompt, signal, size = '1024x1024' }) {
+  const url = settings.baseUrl.replace(/\/+$/, '') + '/images/generations'
+  const body = {
+    model: settings.model,
+    prompt,
+    n: 1,
+    size,
+  }
+
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${settings.apiKey}`,
+    },
+    body: JSON.stringify(body),
+    signal,
+  })
+
+  if (!resp.ok) {
+    const text = await resp.text().catch(() => '')
+    throw new Error(`HTTP ${resp.status}: ${text || resp.statusText}`)
+  }
+
+  const json = await resp.json()
+  const item = json?.data?.[0]
+  if (!item) throw new Error('上游返回数据里没有图片')
+  if (item.b64_json) return `data:image/png;base64,${item.b64_json}`
+  if (item.url) return item.url
+  throw new Error('未知的图片返回格式')
+}
+
 export async function streamChat({ settings, messages, signal, onDelta }) {
   const url = settings.baseUrl.replace(/\/+$/, '') + '/chat/completions'
   const body = {
