@@ -81,11 +81,21 @@ export default function ChatView({
 }) {
   const [input, setInput] = useState('')
   const [images, setImages] = useState([]) // [{ id, name, dataUrl }]
+  const [previewSrc, setPreviewSrc] = useState(null)
   const scrollRef = useRef(null)
   const taRef = useRef(null)
   const fileRef = useRef(null)
 
   const messages = conversation?.messages ?? []
+
+  useEffect(() => {
+    if (!previewSrc) return
+    function onKey(e) {
+      if (e.key === 'Escape') setPreviewSrc(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [previewSrc])
 
   useEffect(() => {
     const el = scrollRef.current
@@ -206,15 +216,15 @@ export default function ChatView({
                 {m.images && m.images.length > 0 && (
                   <div className="msg-images">
                     {m.images.map((src, k) => (
-                      <a
+                      <button
+                        type="button"
                         key={k}
-                        href={src}
-                        target="_blank"
-                        rel="noreferrer"
                         className="msg-image"
+                        onClick={() => setPreviewSrc(src)}
+                        title="点击查看大图"
                       >
                         <img src={src} alt="" />
-                      </a>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -319,6 +329,37 @@ export default function ChatView({
           </div>
         </div>
       </form>
+
+      {previewSrc && (
+        <div
+          className="lightbox-backdrop"
+          onClick={() => setPreviewSrc(null)}
+        >
+          <img
+            src={previewSrc}
+            alt=""
+            className="lightbox-img"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            type="button"
+            className="lightbox-close"
+            onClick={() => setPreviewSrc(null)}
+            title="关闭 (Esc)"
+          >
+            ×
+          </button>
+          <a
+            href={previewSrc}
+            download
+            className="lightbox-download"
+            onClick={(e) => e.stopPropagation()}
+            title="下载原图"
+          >
+            ↓
+          </a>
+        </div>
+      )}
     </main>
   )
 }
